@@ -38,9 +38,9 @@ import {
 const Reports = () => {
   const { reportCards, students, deleteReportCard } = useReportContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClass, setSelectedClass] = useState<string>('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedTerm, setSelectedTerm] = useState<string>('');
+  const [selectedClass, setSelectedClass] = useState<string>('all');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedTerm, setSelectedTerm] = useState<string>('all');
   
   const classes = Array.from(new Set(students.map(student => student.class)));
   const academicYears = Array.from(new Set(reportCards.map(report => report.academicYear)));
@@ -49,9 +49,9 @@ const Reports = () => {
   const filteredReports = reportCards.filter(report => {
     const matchesSearch = report.student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           report.student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = !selectedClass || report.student.class === selectedClass;
-    const matchesYear = !selectedYear || report.academicYear === selectedYear;
-    const matchesTerm = !selectedTerm || report.term === selectedTerm;
+    const matchesClass = selectedClass === 'all' || report.student.class === selectedClass;
+    const matchesYear = selectedYear === 'all' || report.academicYear === selectedYear;
+    const matchesTerm = selectedTerm === 'all' || report.term === selectedTerm;
     
     return matchesSearch && matchesClass && matchesYear && matchesTerm;
   });
@@ -88,7 +88,7 @@ const Reports = () => {
                   <SelectValue placeholder="Filter by Class" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Classes</SelectItem>
+                  <SelectItem value="all">All Classes</SelectItem>
                   {classes.map(cls => (
                     <SelectItem key={cls} value={cls}>Class {cls}</SelectItem>
                   ))}
@@ -100,7 +100,7 @@ const Reports = () => {
                   <SelectValue placeholder="Academic Year" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Years</SelectItem>
+                  <SelectItem value="all">All Years</SelectItem>
                   {academicYears.map(year => (
                     <SelectItem key={year} value={year}>{year}</SelectItem>
                   ))}
@@ -112,7 +112,7 @@ const Reports = () => {
                   <SelectValue placeholder="Term" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Terms</SelectItem>
+                  <SelectItem value="all">All Terms</SelectItem>
                   {terms.map(term => (
                     <SelectItem key={term} value={term}>{term}</SelectItem>
                   ))}
