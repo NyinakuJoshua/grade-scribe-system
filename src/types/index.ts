@@ -22,6 +22,8 @@ export interface Subject {
 }
 
 export interface Grade {
+  classScore: number;
+  examScore: number;
   marks: number;
   percentage: number;
   letterGrade: string;
@@ -45,6 +47,7 @@ export interface ReportCard {
   percentage: number;
   overallGrade: string;
   teacherRemarks: string;
+  classTeacherName?: string;
   attendance: {
     present: number;
     total: number;

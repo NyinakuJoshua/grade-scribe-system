@@ -7,7 +7,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function calculateGrade(marks: number, maxMarks: number): Grade {
+export function calculateGrade(classScore: number, examScore: number, maxMarks: number): Grade {
+  // Class score is 30% of total
+  const weightedClassScore = (classScore / maxMarks) * 30;
+  
+  // Exam score is 70% of total
+  const weightedExamScore = (examScore / maxMarks) * 70;
+  
+  // Total marks
+  const marks = (weightedClassScore / 30) * maxMarks * 0.3 + (weightedExamScore / 70) * maxMarks * 0.7;
+  
   const percentage = (marks / maxMarks) * 100;
   let letterGrade = '';
   let remarks = '';
@@ -36,6 +45,8 @@ export function calculateGrade(marks: number, maxMarks: number): Grade {
   }
 
   return {
+    classScore,
+    examScore,
     marks,
     percentage,
     letterGrade,

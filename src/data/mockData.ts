@@ -2,73 +2,7 @@
 import { Student, Subject, ReportCard } from "@/types";
 import { calculateGrade, generateId } from "@/lib/utils";
 
-export const mockStudents: Student[] = [
-  {
-    id: "s1",
-    name: "John Smith",
-    rollNumber: "2023001",
-    class: "10",
-    section: "A",
-    gender: "Male",
-    dateOfBirth: "2008-05-15",
-    contactNumber: "555-123-4567",
-    email: "john.smith@school.edu",
-    address: "123 Main St, Anytown",
-    guardianName: "Mary Smith",
-  },
-  {
-    id: "s2",
-    name: "Emily Johnson",
-    rollNumber: "2023002",
-    class: "10",
-    section: "A",
-    gender: "Female",
-    dateOfBirth: "2008-03-22",
-    contactNumber: "555-234-5678",
-    email: "emily.johnson@school.edu",
-    address: "456 Oak Ave, Anytown",
-    guardianName: "Robert Johnson",
-  },
-  {
-    id: "s3",
-    name: "Michael Chen",
-    rollNumber: "2023003",
-    class: "10",
-    section: "B",
-    gender: "Male",
-    dateOfBirth: "2008-09-10",
-    contactNumber: "555-345-6789",
-    email: "michael.chen@school.edu",
-    address: "789 Pine Rd, Anytown",
-    guardianName: "Wei Chen",
-  },
-  {
-    id: "s4",
-    name: "Sophia Rodriguez",
-    rollNumber: "2023004",
-    class: "10",
-    section: "B",
-    gender: "Female",
-    dateOfBirth: "2008-11-30",
-    contactNumber: "555-456-7890",
-    email: "sophia.rodriguez@school.edu",
-    address: "101 Cedar Ln, Anytown",
-    guardianName: "Isabella Rodriguez",
-  },
-  {
-    id: "s5",
-    name: "James Williams",
-    rollNumber: "2023005",
-    class: "10",
-    section: "A",
-    gender: "Male",
-    dateOfBirth: "2008-07-03",
-    contactNumber: "555-567-8901",
-    email: "james.williams@school.edu",
-    address: "202 Maple Dr, Anytown",
-    guardianName: "David Williams",
-  },
-];
+export const mockStudents: Student[] = [];
 
 export const mockSubjects: Subject[] = [
   {
@@ -110,11 +44,12 @@ export const mockSubjects: Subject[] = [
 
 export const generateMockReportCard = (student: Student, academicYear: string, term: string): ReportCard => {
   const subjectGrades = mockSubjects.map(subject => {
-    // Generate random marks between 40 and 99
-    const marks = Math.floor(Math.random() * 60) + 40;
+    // Generate random marks between 40 and 99 for class score and exam score
+    const classScore = Math.floor(Math.random() * 60) + 40;
+    const examScore = Math.floor(Math.random() * 60) + 40;
     return {
       subject,
-      grade: calculateGrade(marks, subject.maxMarks),
+      grade: calculateGrade(classScore, examScore, subject.maxMarks),
     };
   });
 
@@ -146,6 +81,7 @@ export const generateMockReportCard = (student: Student, academicYear: string, t
     percentage,
     overallGrade,
     teacherRemarks: getRandomRemark(percentage),
+    classTeacherName: '',
     attendance: {
       present: presentDays,
       total: totalDays,

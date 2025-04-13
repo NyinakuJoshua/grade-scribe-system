@@ -21,7 +21,10 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
   const { toast } = useToast();
   const [academicYear, setAcademicYear] = useState("2023-2024");
   const [term, setTerm] = useState("Annual");
-  const [marks, setMarks] = useState<Record<string, number>>(
+  const [classScores, setClassScores] = useState<Record<string, number>>(
+    subjects.reduce((acc, subject) => ({ ...acc, [subject.id]: 0 }), {})
+  );
+  const [examScores, setExamScores] = useState<Record<string, number>>(
     subjects.reduce((acc, subject) => ({ ...acc, [subject.id]: 0 }), {})
   );
   const [attendance, setAttendance] = useState({
@@ -29,8 +32,9 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
     total: 180
   });
   const [teacherRemarks, setTeacherRemarks] = useState("");
+  const [classTeacherName, setClassTeacherName] = useState("");
 
-  const handleMarksChange = (subjectId: string, value: string) => {
+  const handleClassScoreChange = (subjectId: string, value: string) => {
     const numValue = parseInt(value);
     const subject = subjects.find(s => s.id === subjectId);
     
@@ -38,7 +42,21 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
       return; // Invalid input
     }
     
-    setMarks(prev => ({
+    setClassScores(prev => ({
+      ...prev,
+      [subjectId]: numValue || 0
+    }));
+  };
+
+  const handleExamScoreChange = (subjectId: string, value: string) => {
+    const numValue = parseInt(value);
+    const subject = subjects.find(s => s.id === subjectId);
+    
+    if (subject && (isNaN(numValue) || numValue < 0 || numValue > subject.maxMarks)) {
+      return; // Invalid input
+    }
+    
+    setExamScores(prev => ({
       ...prev,
       [subjectId]: numValue || 0
     }));
@@ -49,10 +67,18 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
     
     // Validate marks
     for (const subject of subjects) {
-      if (marks[subject.id] < 0 || marks[subject.id] > subject.maxMarks) {
+      if (classScores[subject.id] < 0 || classScores[subject.id] > subject.maxMarks) {
         toast({
-          title: "Invalid Marks",
-          description: `Marks for ${subject.name} must be between 0 and ${subject.maxMarks}`,
+          title: "Invalid Class Score",
+          description: `Class score for ${subject.name} must be between 0 and ${subject.maxMarks}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      if (examScores[subject.id] < 0 || examScores[subject.id] > subject.maxMarks) {
+        toast({
+          title: "Invalid Exam Score",
+          description: `Exam score for ${subject.name} must be between 0 and ${subject.maxMarks}`,
           variant: "destructive",
         });
         return;
@@ -62,7 +88,7 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
     // Calculate subject grades
     const subjectGrades: SubjectGrade[] = subjects.map(subject => ({
       subject,
-      grade: calculateGrade(marks[subject.id], subject.maxMarks)
+      grade: calculateGrade(classScores[subject.id], examScores[subject.id], subject.maxMarks)
     }));
     
     // Calculate totals
@@ -93,6 +119,7 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
       percentage,
       overallGrade,
       teacherRemarks,
+      classTeacherName,
       attendance: {
         ...attendance,
         percentage: (attendance.present / attendance.total) * 100
@@ -151,19 +178,36 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
         <h2 className="text-lg font-semibold mb-3">Subject Marks</h2>
         <div className="space-y-3">
           {subjects.map(subject => (
-            <div key={subject.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            <div key={subject.id} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center">
               <div className="md:col-span-2">
                 <Label>{subject.name} ({subject.code})</Label>
               </div>
               <div>
+                <Label htmlFor={`class-${subject.id}`} className="text-sm">Class Score (30%)</Label>
                 <Input
+                  id={`class-${subject.id}`}
                   type="number"
-                  value={marks[subject.id]}
-                  onChange={(e) => handleMarksChange(subject.id, e.target.value)}
+                  value={classScores[subject.id]}
+                  onChange={(e) => handleClassScoreChange(subject.id, e.target.value)}
                   min={0}
                   max={subject.maxMarks}
                   className="w-full"
                 />
+              </div>
+              <div>
+                <Label htmlFor={`exam-${subject.id}`} className="text-sm">Exam Score (70%)</Label>
+                <Input
+                  id={`exam-${subject.id}`}
+                  type="number"
+                  value={examScores[subject.id]}
+                  onChange={(e) => handleExamScoreChange(subject.id, e.target.value)}
+                  min={0}
+                  max={subject.maxMarks}
+                  className="w-full"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Total: {(classScores[subject.id] * 0.3 + examScores[subject.id] * 0.7).toFixed(1)}
               </div>
               <div className="text-sm text-muted-foreground">
                 Max: {subject.maxMarks}
@@ -208,6 +252,16 @@ const ReportForm = ({ student, subjects, onComplete }: ReportFormProps) => {
           onChange={(e) => setTeacherRemarks(e.target.value)}
           placeholder="Enter your remarks about the student's performance"
           rows={4}
+        />
+      </div>
+      
+      <div>
+        <Label htmlFor="classTeacherName">Class Teacher's Name (for signature)</Label>
+        <Input
+          id="classTeacherName"
+          value={classTeacherName}
+          onChange={(e) => setClassTeacherName(e.target.value)}
+          placeholder="Enter class teacher's name"
         />
       </div>
       
